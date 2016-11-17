@@ -1,35 +1,36 @@
 function View(model) {
-  /**
-	 * Canvas creation!
-	 */
-	this.canvas = document.getElementById("myCanvas");
-	this.canvas.width = window.innerWidth;
-	this.canvas.height = window.innerHeight;
-	this.canvas.onmousedown = function(){ return false; };
-	this.ctx = this.canvas.getContext("2d");
+  Panel.call(this, 0, 0, window.innerWidth, window.innerHeight);
+  this.color = "#FFFFFF";
 
-  this.panels = [];
+  exampleTopBar = new Panel(0, 0, window.innerWidth, 100);
+  exampleTopBar.color = "#33AA66";
 
-  exampleMenu = new Panel(100, 100, 100, 100)
-  exampleMenu.color = "#808080";
+  this.components.push(exampleTopBar);
 
-  exampleButton = new Button(10, 10, 10, 10)
+  exampleSideMenu = new Panel(0, 100, 100, window.innerHeight);
+  exampleSideMenu.color = "#808080";
 
-  exampleMenu.components.push(exampleButton);
-  this.panels.push(exampleMenu);
-}
-
-View.prototype.draw = function() {
-  for (panelID in this.panels) {
-    Renderer.renderObject(this.ctx, this.panels[panelID], 0, 0);
+  exampleButton = new Panel(10, 10, 80, 80)
+  exampleButton.clickHandler = function() {
+    console.log("I'm hit!");
+    exampleCanvas.text = "You clicked the button!";
   }
+
+  exampleSideMenu.components.push(exampleButton);
+  this.components.push(exampleSideMenu);
+
+  exampleCanvas = new Panel(100, 100, window.innerWidth, window.innerHeight);
+  exampleCanvas.color = "#334D66";
+  exampleCanvas.text = "Hello I am text.";
+  exampleCanvas.postprocess = function(renderer, offsetX, offsetY) {
+    renderer.ctx.fillStyle = "#FFFFFF";
+    renderer.ctx.fillText("Mini-canvas text: " + this.text, 50 + this.x + offsetX, 50 + this.y + offsetY);
+  }
+
+  this.components.push(exampleCanvas);
+
+  console.log(Object.create(Panel.prototype));
+
 }
 
-View.prototype.clickHandler = function(event) {
-  // Put the event into a nice vector.
-  for (panelID in this.panels) {
-    if (this.panels[panelID].containsPoint(event)) {
-      this.panels[panelID].clickHandler(event);
-    }
-  }
-}
+View.prototype = Object.create(Panel.prototype);

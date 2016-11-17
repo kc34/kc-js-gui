@@ -18,12 +18,11 @@ html, body {
 }
 </style>
 
+<script src="js/util/panel.js"></script>
+<script src="js/util/vector.js"></script>
 <script src="js/model/model.js"></script>
 <script src="js/view/view.js"></script>
 <script src="js/view/renderer.js"></script>
-<script src="js/util/panel.js"></script>
-<script src="js/util/button.js"></script>
-<script src="js/util/vector.js"></script>
 
 <script>
 
@@ -42,6 +41,7 @@ var currentDraw = new Date();
 function init() {
   model = new Model(view);
   view = new View(model);
+  renderer = new Renderer();
 }
 
 /**
@@ -63,7 +63,7 @@ function main() {
         accumulator -= TIME_STEP;
     }
 
-	view.draw();
+	renderer.renderObject(view, 0, 0);
 }
 
 /**
