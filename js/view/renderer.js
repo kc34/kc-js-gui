@@ -7,6 +7,10 @@ var Renderer = function() {
   this.ctx = this.canvas.getContext("2d");
 }
 
-Renderer.prototype.renderObject = function(obj, offsetX, offsetY) {
+Renderer.prototype.renderPanel = function(obj, offsetX, offsetY) {
   obj.draw(this, obj.x + offsetX, obj.y + offsetY);
+}
+
+Renderer.prototype.renderBall = function(obj, offsetX, offsetY) {
+  this.ctx.fillRect(obj.x + offsetX, obj.y + offsetY, 5, 5);
 }

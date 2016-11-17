@@ -27,8 +27,23 @@ html, body {
 <script>
 "use strict";
 
+/**
+ * Create singletons:
+ */
+
+/**
+ * A model. Doesn't do anything yet.
+ */
 var model;
+
+/**
+ * A GUI. It's a very special Panel.
+ */
 var view;
+
+/**
+ * Rendering manager. Works closely with the view.
+ */
 var renderer;
 
 /**
@@ -63,9 +78,9 @@ function main() {
     {
         model.update(TIME_STEP);
         accumulator -= TIME_STEP;
-    }
 
-	renderer.renderObject(view, 0, 0);
+    	renderer.renderPanel(view, 0, 0);
+    }
 }
 
 /**

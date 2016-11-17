@@ -30,7 +30,7 @@ Panel.prototype.postprocess = function(renderer, offsetX, offsetY) {};
 
 Panel.prototype.drawComponents = function(offsetX, offsetY) {
   for (var componentIdx in this.components) {
-    renderer.renderObject(this.components[componentIdx], offsetX, offsetY);
+    renderer.renderPanel(this.components[componentIdx], offsetX, offsetY);
   }
 }
 
@@ -67,7 +67,7 @@ Panel.prototype.addComponent = function(name, component) {
 }
 
 /**
- *
+ * Setter function for the window size and position.
  */
 Panel.prototype.setWindow = function(x, y, width, height) {
   this.x = x;
