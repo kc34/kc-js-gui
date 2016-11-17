@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Aquarium Simulator</title>
+</head>
+<body>
+
+<canvas id="myCanvas">
+  Your browser does not support the canvas element.
+</canvas>
+
+<style>
+html, body {
+  width:  100%;
+  height: 100%;
+  margin: 0px;
+  overflow: hidden;
+}
+</style>
+
+<script src="js/model/model.js"></script>
+<script src="js/view/view.js"></script>
+<script src="js/view/renderer.js"></script>
+<script src="js/util/panel.js"></script>
+<script src="js/util/button.js"></script>
+<script src="js/util/vector.js"></script>
+
+<script>
+
+var model;
+var view;
+
+/**
+ * 	Other important global variables (e.g. time-keeping, environment)
+ */
+
+var TIME_STEP = 1.0 / 60; // Time-step. Measured in seconds.
+var accumulator = 0.0;
+var currentTime = new Date();
+var currentDraw = new Date();
+
+function init() {
+  model = new Model(view);
+  view = new View(model);
+}
+
+/**
+ * 	Runs physics-model and rendering separately, but on same thread.
+ */
+function main() {
+
+	newTime = new Date();
+    frameTime = (newTime - currentTime) / 1000;
+
+    if ( frameTime > 0.1 )
+        frameTime = 0.1;
+    currentTime = newTime;
+
+    accumulator += frameTime;
+    while ( accumulator >= TIME_STEP )
+    {
+        model.update(TIME_STEP);
+        accumulator -= TIME_STEP;
+    }
+
+	view.draw();
+}
+
+/**
+ * Canvas event registration
+ */
+
+/** Event: Mousedown followed by mouseup. */
+window.addEventListener('click', function(event) {
+	view["clickHandler"](event);
+}, false);
+
+//myModel.start();
+init();
+var mainLooper = setInterval(main, 1000 * TIME_STEP);
+
+</script>
+
+</body>
+</html>
