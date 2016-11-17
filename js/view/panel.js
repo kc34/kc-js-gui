@@ -21,22 +21,28 @@ function Panel(x, y, width, height) {
 /**
  * The main drawing function. Contains space for pre- and post-processing.
  */
-Panel.prototype.draw = function(renderer, offsetX, offsetY) {
-  this.preprocess(renderer, offsetX, offsetY);
-  renderer.ctx.fillStyle = this.color;
-  renderer.ctx.fillRect(offsetX, offsetY, this.width, this.height);
-  this.drawComponents(offsetX, offsetY);
-  this.postprocess(renderer, offsetX, offsetY);
-}
+Panel.prototype.draw = function(ctx, windowX, windowY) {
+  this.preprocess(renderer, windowX, windowY);
+  ctx.fillStyle = this.color;
+  ctx.fillRect(windowX, windowY, this.width, this.height);
 
-Panel.prototype.preprocess = function(renderer, offsetX, offsetY) {};
-Panel.prototype.postprocess = function(renderer, offsetX, offsetY) {};
-
-Panel.prototype.drawComponents = function(offsetX, offsetY) {
   for (var componentIdx in this.components) {
-    renderer.renderPanel(this.components[componentIdx], offsetX, offsetY);
+    var obj = this.components[componentIdx];
+    obj.draw(ctx, windowX + obj.x, windowY + obj.y);
   }
+
+  this.postprocess(ctx, windowX, windowY);
 }
+
+/**
+ * Useful for resizing. Defaults to no-op.
+ */
+Panel.prototype.preprocess = function(ctx, windowX, windowY) {};
+
+/**
+ * Useful for drawing non-panel objects. Defaults to no-op.
+ */
+Panel.prototype.postprocess = function(ctx, windowX, windowY) {};
 
 /**
  * Given a point, returns whether point is on this panel.

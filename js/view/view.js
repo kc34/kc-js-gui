@@ -1,6 +1,13 @@
 "use strict";
 function View(model) {
   Panel.call(this, 0, 0, window.innerWidth, window.innerHeight);
+
+  this.canvas = document.getElementById("myCanvas");
+  this.canvas.width = window.innerWidth;
+  this.canvas.height = window.innerHeight;
+  this.canvas.onmousedown = function(){ return false; };
+  this.ctx = this.canvas.getContext("2d");
+
   this.color = "#CCCCCC";
 
   var exampleMainScreen = new Panel(100, 100, window.innerWidth, window.innerHeight);
@@ -27,11 +34,11 @@ function View(model) {
   var exampleCanvas = new Panel(100, 100, window.innerWidth, window.innerHeight);
   exampleCanvas.color = "#334D66";
   exampleCanvas.text = "Hello I am text.";
-  exampleCanvas.postprocess = function(renderer, offsetX, offsetY) {
-    renderer.ctx.fillStyle = "#FFFFFF";
-    renderer.ctx.fillText("Mini-canvas text: " + this.text, 50 + offsetX, 50 + offsetY);
+  exampleCanvas.postprocess = function(ctx, offsetX, offsetY) {
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillText("Mini-canvas text: " + this.text, 50 + offsetX, 50 + offsetY);
     for (var ballIdx in model.balls) {
-      renderer.renderBall(model.balls[ballIdx], offsetX, offsetY);
+      Renderer.renderBall(ctx, model.balls[ballIdx], offsetX, offsetY);
     }
   }
 
@@ -49,11 +56,14 @@ function View(model) {
 
 View.prototype = Object.create(Panel.prototype);
 
+View.prototype.drawSelf = function() {
+  this.draw(this.ctx, 0, 0);
+}
 
-View.prototype.preprocess = function(renderer, offsetX, offsetY) {
+View.prototype.preprocess = function(ctx, offsetX, offsetY) {
 
-  renderer.canvas.width = window.innerWidth;
-  renderer.canvas.height = window.innerHeight;
+  this.canvas.width = window.innerWidth;
+  this.canvas.height = window.innerHeight;
   /**
    * This menu just takes up the whole screen.
    */

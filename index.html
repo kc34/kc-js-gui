@@ -79,7 +79,7 @@ function main() {
         model.update(TIME_STEP);
         accumulator -= TIME_STEP;
 
-    	renderer.renderPanel(view, 0, 0);
+    	view.drawSelf();
     }
 }
 
