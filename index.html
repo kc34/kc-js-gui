@@ -42,11 +42,6 @@ var model;
 var view;
 
 /**
- * Rendering manager. Works closely with the view.
- */
-var renderer;
-
-/**
  * 	Other important global variables (e.g. time-keeping, environment)
  */
 
@@ -58,7 +53,6 @@ var currentDraw = new Date();
 function init() {
   model = new Model(view);
   view = new View(model);
-  renderer = new Renderer();
 }
 
 /**
@@ -66,21 +60,19 @@ function init() {
  */
 function main() {
 
-	var newTime = new Date();
+  var newTime = new Date();
   var frameTime = (newTime - currentTime) / 1000;
 
-    if ( frameTime > 0.1 )
-        frameTime = 0.1;
-    currentTime = newTime;
+  if ( frameTime > 0.1 )
+    frameTime = 0.1;
+  currentTime = newTime;
 
-    accumulator += frameTime;
-    while ( accumulator >= TIME_STEP )
-    {
-        model.update(TIME_STEP);
-        accumulator -= TIME_STEP;
-
-    	view.drawSelf();
-    }
+  accumulator += frameTime;
+  while ( accumulator >= TIME_STEP ) {
+    model.update(TIME_STEP);
+    accumulator -= TIME_STEP;
+  }
+  view.draw();
 }
 
 /**

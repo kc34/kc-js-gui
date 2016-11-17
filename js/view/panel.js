@@ -22,7 +22,7 @@ function Panel(x, y, width, height) {
  * The main drawing function. Contains space for pre- and post-processing.
  */
 Panel.prototype.draw = function(ctx, windowX, windowY) {
-  this.preprocess(renderer, windowX, windowY);
+  this.preprocess(ctx, windowX, windowY);
   ctx.fillStyle = this.color;
   ctx.fillRect(windowX, windowY, this.width, this.height);
 
@@ -84,4 +84,35 @@ Panel.prototype.setWindow = function(x, y, width, height) {
   this.y = y;
   this.width = width;
   this.height = height;
+}
+
+/**
+ * The MainPanel is a special Panel that has access to the canvas.
+ *
+ * GUI hierarchies should start with a MainPanel.
+ */
+function MainPanel() {
+  Panel.call(this, 0, 0, window.innerWidth, window.innerHeight);
+
+  this.canvas = document.getElementById("myCanvas");
+  this.canvas.width = window.innerWidth;
+  this.canvas.height = window.innerHeight;
+  this.canvas.onmousedown = function(){ return false; };
+  this.ctx = this.canvas.getContext("2d");
+}
+
+MainPanel.prototype = Object.create(Panel.prototype);
+
+/**
+ * Specialized draw used to start GUI hierarcies.
+ */
+MainPanel.prototype.draw = function() {
+  Panel.prototype.draw.call(this, this.ctx, 0, 0);
+}
+
+/**
+ * Default window setter. Sets this panel to take up all available space.
+ */
+MainPanel.prototype.preprocess = function() {
+  this.setWindow(0, 0, window.innerWidth, window.innerHeight);
 }

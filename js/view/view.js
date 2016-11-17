@@ -1,12 +1,6 @@
 "use strict";
 function View(model) {
-  Panel.call(this, 0, 0, window.innerWidth, window.innerHeight);
-
-  this.canvas = document.getElementById("myCanvas");
-  this.canvas.width = window.innerWidth;
-  this.canvas.height = window.innerHeight;
-  this.canvas.onmousedown = function(){ return false; };
-  this.ctx = this.canvas.getContext("2d");
+  MainPanel.call(this);
 
   this.color = "#CCCCCC";
 
@@ -54,11 +48,7 @@ function View(model) {
 
 }
 
-View.prototype = Object.create(Panel.prototype);
-
-View.prototype.drawSelf = function() {
-  this.draw(this.ctx, 0, 0);
-}
+View.prototype = Object.create(MainPanel.prototype);
 
 View.prototype.preprocess = function(ctx, offsetX, offsetY) {
 
