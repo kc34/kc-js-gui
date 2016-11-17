@@ -1,5 +1,9 @@
 "use strict";
 /**
+ *
+ */
+
+/**
  * Basic GUI structure. Can contain other Panels.
  *
  * Configure its draw() and clickHandler()!
