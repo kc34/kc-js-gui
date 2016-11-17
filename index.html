@@ -25,9 +25,11 @@ html, body {
 <script src="js/view/renderer.js"></script>
 
 <script>
+"use strict";
 
 var model;
 var view;
+var renderer;
 
 /**
  * 	Other important global variables (e.g. time-keeping, environment)
@@ -49,8 +51,8 @@ function init() {
  */
 function main() {
 
-	newTime = new Date();
-    frameTime = (newTime - currentTime) / 1000;
+	var newTime = new Date();
+  var frameTime = (newTime - currentTime) / 1000;
 
     if ( frameTime > 0.1 )
         frameTime = 0.1;

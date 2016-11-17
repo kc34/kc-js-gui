@@ -1,4 +1,5 @@
-function Renderer() {
+"use strict";
+var Renderer = function() {
   this.canvas = document.getElementById("myCanvas");
   this.canvas.width = window.innerWidth;
   this.canvas.height = window.innerHeight;
@@ -7,5 +8,5 @@ function Renderer() {
 }
 
 Renderer.prototype.renderObject = function(obj, offsetX, offsetY) {
-  obj.draw(this, offsetX, offsetY);
+  obj.draw(this, obj.x + offsetX, obj.y + offsetY);
 }
