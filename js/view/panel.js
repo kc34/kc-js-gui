@@ -1,6 +1,8 @@
 "use strict";
 /**
+ * Panel 0.0.1
  *
+ * By Kevin Chang
  */
 
 /**
@@ -22,16 +24,24 @@ function Panel(x, y, width, height) {
  * The main drawing function. Contains space for pre- and post-processing.
  */
 Panel.prototype.draw = function(ctx, windowX, windowY) {
-  this.preprocess(ctx, windowX, windowY);
-  ctx.fillStyle = this.color;
-  ctx.fillRect(windowX, windowY, this.width, this.height);
 
-  for (var componentIdx in this.components) {
-    var obj = this.components[componentIdx];
-    obj.draw(ctx, windowX + obj.x, windowY + obj.y);
-  }
+  this.preprocess(ctx, windowX, windowY);
+  this.drawSelf(ctx, windowX, windowY);
+
+  Object.keys(this.components)
+    .map(function(key) { return this.components[key] }, this)
+    .forEach(function(obj) { obj.draw(ctx, windowX + obj.x, windowY + obj.y) });
 
   this.postprocess(ctx, windowX, windowY);
+
+}
+
+/**
+ * Draws itself onto the given context.
+ */
+Panel.prototype.drawSelf = function(ctx, windowX, windowY) {
+  ctx.fillStyle = this.color;
+  ctx.fillRect(windowX, windowY, this.width, this.height);
 }
 
 /**
@@ -51,22 +61,19 @@ Panel.prototype.postprocess = function(ctx, windowX, windowY) {};
  *  (1, 1) -> true
  *  (3, 3) -> false
  */
-Panel.prototype.containsPoint = function(point) {
-  return ((this.x <= point.x && point.x <= this.x + this.width)
-          && (this.y <= point.y && point.y <= this.y + this.height));
+Panel.containsPoint = function(panel, point) {
+  return ((panel.x <= point.x && point.x <= panel.x + panel.width)
+      && (panel.y <= point.y && point.y <= panel.y + panel.height));
 }
 
 /**
  * Given a click, delegates to all of its components.
  */
 Panel.prototype.clickHandler = function(event) {
-  var relativeEvent = Vector.fromComponents(event.x - this.x, event.y - this.y);
-  console.log(relativeEvent)
-  for (var componentIdx in this.components) {
-    if (this.components[componentIdx].containsPoint(relativeEvent)) {
-      this.components[componentIdx].clickHandler(relativeEvent);
-    }
-  }
+  Object.keys(this.components) // Gets keys
+    .map(function(key) { return this.components[key] }, this) // Gets panel references
+    .filter(function(panel) { return Panel.containsPoint(panel, event)}) // Removes unclicked ones
+    .forEach(function(panel) { panel.clickHandler({x : event.x - panel.x, y : event.y - panel.y}) });
 }
 
 /**
@@ -91,7 +98,7 @@ Panel.prototype.setWindow = function(x, y, width, height) {
  *
  * GUI hierarchies should start with a MainPanel.
  */
-function MainPanel() {
+function ViewPanel() {
   Panel.call(this, 0, 0, window.innerWidth, window.innerHeight);
 
   this.canvas = document.getElementById("myCanvas");
@@ -101,18 +108,18 @@ function MainPanel() {
   this.ctx = this.canvas.getContext("2d");
 }
 
-MainPanel.prototype = Object.create(Panel.prototype);
+ViewPanel.prototype = Object.create(Panel.prototype);
 
 /**
  * Specialized draw used to start GUI hierarcies.
  */
-MainPanel.prototype.draw = function() {
+ViewPanel.prototype.draw = function() {
   Panel.prototype.draw.call(this, this.ctx, 0, 0);
 }
 
 /**
  * Default window setter. Sets this panel to take up all available space.
  */
-MainPanel.prototype.preprocess = function() {
+ViewPanel.prototype.preprocess = function() {
   this.setWindow(0, 0, window.innerWidth, window.innerHeight);
 }

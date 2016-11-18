@@ -1,6 +1,6 @@
 "use strict";
 function View(model) {
-  MainPanel.call(this);
+  ViewPanel.call(this);
 
   this.color = "#CCCCCC";
 
@@ -44,11 +44,9 @@ function View(model) {
   }
   this.addComponent("exampleMainScreen", exampleMainScreen);
 
-  console.log(Object.create(Panel.prototype));
-
 }
 
-View.prototype = Object.create(MainPanel.prototype);
+View.prototype = Object.create(ViewPanel.prototype);
 
 View.prototype.preprocess = function(ctx, offsetX, offsetY) {
 
