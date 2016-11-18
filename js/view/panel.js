@@ -1,6 +1,6 @@
 "use strict";
 /**
- * Panel 0.0.1
+ * Panel 0.1
  *
  * By Kevin Chang
  */
@@ -98,10 +98,11 @@ Panel.prototype.setWindow = function(x, y, width, height) {
  *
  * GUI hierarchies should start with a MainPanel.
  */
-function ViewPanel() {
-  Panel.call(this, 0, 0, window.innerWidth, window.innerHeight);
+function ViewPanel(canvas) {
+  this.canvas = canvas;
+  Panel.call(this, 0, 0, this.canvas.width, this.canvas.height);
 
-  this.canvas = document.getElementById("myCanvas");
+  this.canvas = canvas;
   this.canvas.width = window.innerWidth;
   this.canvas.height = window.innerHeight;
   this.canvas.onmousedown = function(){ return false; };
@@ -122,4 +123,11 @@ ViewPanel.prototype.draw = function() {
  */
 ViewPanel.prototype.preprocess = function() {
   this.setWindow(0, 0, window.innerWidth, window.innerHeight);
+}
+/**
+ * Given a click, delegates to all of its components.
+ */
+ViewPanel.prototype.clickHandler = function(event) {
+  var canvasRect = this.canvas.getBoundingClientRect();
+  Panel.prototype.clickHandler.call(this, {x: event.x - canvasRect.left, y: event.y - canvasRect.top});
 }

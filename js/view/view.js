@@ -1,6 +1,6 @@
 "use strict";
 function View(model) {
-  ViewPanel.call(this);
+  ViewPanel.call(this, document.getElementById("myCanvas"));
 
   this.color = "#CCCCCC";
 
@@ -23,6 +23,10 @@ function View(model) {
   }
 
   exampleSideMenu.addComponent("exampleButton", exampleButton);
+
+  exampleSideMenu.preprocess = function() {
+    this.components["exampleButton"].setWindow(this.width * 0.1, this.width * 0.1, this.width * 0.8, this.width * 0.8)
+  }
   exampleMainScreen.addComponent("exampleSideMenu", exampleSideMenu);
 
   var exampleCanvas = new Panel(100, 100, window.innerWidth, window.innerHeight);
@@ -38,9 +42,9 @@ function View(model) {
 
   exampleMainScreen.addComponent("exampleCanvas", exampleCanvas);
   exampleMainScreen.preprocess = function(renderer, offsetX, offsetY) {
-    this.components["exampleTopBar"].setWindow(0, 0, this.width, 100);
-    this.components["exampleSideMenu"].setWindow(0, 100, 100, this.height - 100);
-    this.components["exampleCanvas"].setWindow(100, 100, this.width - 100, this.height - 100);
+    this.components["exampleTopBar"].setWindow(0, 0, this.width, this.height * 0.1);
+    this.components["exampleSideMenu"].setWindow(0, this.height * 0.1, this.width * 0.1, this.height * 0.9);
+    this.components["exampleCanvas"].setWindow(this.width * 0.1, this.height * 0.1, this.width * 0.9, this.height * 0.9);
   }
   this.addComponent("exampleMainScreen", exampleMainScreen);
 
@@ -74,8 +78,8 @@ View.prototype.preprocess = function(ctx, offsetX, offsetY) {
   } else {
     // Taller. Capped on width.
     this.components["exampleMainScreen"].x = this.width * margins;
-    this.components["exampleMainScreen"].width = this.width * (100 - 2 * margins);
-    this.components["exampleMainScreen"].y = this.height * 0.5 - (this.width / 1920 * 1080 * (1 - 2 * margins)) * 0.5;
+    this.components["exampleMainScreen"].width = this.width * (1 - 2 * margins);
+    this.components["exampleMainScreen"].y = (this.height - this.width / 1920 * 1080 * (1 - 2 * margins)) * 0.5;
     this.components["exampleMainScreen"].height = this.width / 1920 * 1080 * (1 - 2 * margins);
   }
 }

@@ -1,14 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Aquarium Simulator</title>
-</head>
-<body>
-
-<canvas id="myCanvas">
-  Your browser does not support the canvas element.
-</canvas>
-
+<title>GUI Demo</title>
 <style>
 html, body {
   width:  100%;
@@ -17,6 +10,12 @@ html, body {
   overflow: hidden;
 }
 </style>
+</head>
+<body>
+
+<canvas id="myCanvas">
+  Your browser does not support the canvas element.
+</canvas>
 
 <script src="js/view/panel.js"></script>
 <script src="js/util/vector.js"></script>
@@ -89,6 +88,5 @@ init();
 var mainLooper = setInterval(main, 1000 * TIME_STEP);
 
 </script>
-
 </body>
 </html>
