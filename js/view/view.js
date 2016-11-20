@@ -34,19 +34,37 @@ function View(model) {
   exampleCanvas.text = "Hello I am text.";
   exampleCanvas.postprocess = function(ctx, offsetX, offsetY) {
     ctx.fillStyle = "#FFFFFF";
-    ctx.fillText("Mini-canvas text: " + this.text, 50 + offsetX, 50 + offsetY);
+    ctx.fillText("Mini-canvas text: " + this.text, 100 + offsetX, 100 + offsetY);
     for (var ballIdx in model.balls) {
       Renderer.renderBall(ctx, model.balls[ballIdx], offsetX, offsetY);
     }
   }
 
   exampleMainScreen.addComponent("exampleCanvas", exampleCanvas);
+
+  var examplePopup = new Panel(100, 50, 100, 100);
+  examplePopup.color = "#FF0000";
+  examplePopup.z_index = 500;
+  examplePopup.clickHandler = function() {
+    console.log("Ow");
+    this.z_index = -500;
+  }
+  examplePopup.postprocess = function(ctx, offsetX, offsetY) {
+    ctx.fillStyle = "#FFFFFF";
+    ctx.fillText("Hello!", offsetX, 10 + offsetY);
+    ctx.fillText("I am at the top of the screen.", offsetX, 20 + offsetY);
+    ctx.fillText("Click me to drop my z-index.", offsetX, 30 + offsetY);
+  }
+  exampleMainScreen.addComponent("examplePopup", examplePopup);
+
   exampleMainScreen.preprocess = function(renderer, offsetX, offsetY) {
     this.components["exampleTopBar"].setWindow(0, 0, this.width, this.height * 0.1);
     this.components["exampleSideMenu"].setWindow(0, this.height * 0.1, this.width * 0.1, this.height * 0.9);
     this.components["exampleCanvas"].setWindow(this.width * 0.1, this.height * 0.1, this.width * 0.9, this.height * 0.9);
   }
   this.addComponent("exampleMainScreen", exampleMainScreen);
+
+
 
 }
 

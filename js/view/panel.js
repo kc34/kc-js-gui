@@ -18,6 +18,7 @@ function Panel(x, y, width, height) {
   this.height = height;
   this.color = "#000000"
   this.components = {};
+  this.z_index = 0; // Inspired by CSS. Higher number means it will be up front.
 }
 
 /**
@@ -30,6 +31,7 @@ Panel.prototype.draw = function(ctx, windowX, windowY) {
 
   Object.keys(this.components)
     .map(function(key) { return this.components[key] }, this)
+    .sort(function(obj1, obj2) { return obj1.z_index - obj2.z_index}) // sorts-by-ascending
     .forEach(function(obj) { obj.draw(ctx, windowX + obj.x, windowY + obj.y) });
 
   this.postprocess(ctx, windowX, windowY);
@@ -70,10 +72,18 @@ Panel.containsPoint = function(panel, point) {
  * Given a click, delegates to all of its components.
  */
 Panel.prototype.clickHandler = function(event) {
-  Object.keys(this.components) // Gets keys
+
+  var sortedPanels = Object.keys(this.components) // Gets keys
     .map(function(key) { return this.components[key] }, this) // Gets panel references
     .filter(function(panel) { return Panel.containsPoint(panel, event)}) // Removes unclicked ones
-    .forEach(function(panel) { panel.clickHandler({x : event.x - panel.x, y : event.y - panel.y}) });
+    .sort(function(panel1, panel2) { return -1 * (panel1.z_index - panel2.z_index) }); // Sorts descending
+
+  console.log(sortedPanels)
+
+  if (sortedPanels.length > 0) {
+    var panel = sortedPanels[0];
+    panel.clickHandler({x : event.x - panel.x, y : event.y - panel.y})
+  }
 }
 
 /**
