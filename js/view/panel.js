@@ -1,6 +1,6 @@
 "use strict";
 /**
- * Panel 0.1
+ * Panel 0.1.1
  *
  * By Kevin Chang
  */
@@ -27,21 +27,21 @@ function Panel(x, y, width, height) {
 Panel.prototype.draw = function(ctx, windowX, windowY) {
 
   this.preprocess(ctx, windowX, windowY);
-  this.drawSelf(ctx, windowX, windowY);
+  this.drawPanel(ctx, windowX, windowY);
+  this.postprocess(ctx, windowX, windowY);
 
   Object.keys(this.components)
     .map(function(key) { return this.components[key] }, this)
     .sort(function(obj1, obj2) { return obj1.z_index - obj2.z_index}) // sorts-by-ascending
     .forEach(function(obj) { obj.draw(ctx, windowX + obj.x, windowY + obj.y) });
 
-  this.postprocess(ctx, windowX, windowY);
 
 }
 
 /**
  * Draws itself onto the given context.
  */
-Panel.prototype.drawSelf = function(ctx, windowX, windowY) {
+Panel.prototype.drawPanel = function(ctx, windowX, windowY) {
   ctx.fillStyle = this.color;
   ctx.fillRect(windowX, windowY, this.width, this.height);
 }
