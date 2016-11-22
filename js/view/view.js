@@ -4,7 +4,7 @@ function View(model) {
 
   this.color = "#CCCCCC";
 
-  var exampleMainScreen = new Panel(100, 100, window.innerWidth, window.innerHeight);
+  var exampleMainScreen = new Panel(0, 0, window.innerWidth, window.innerHeight);
   exampleMainScreen.color = "#FF0000";
 
   var exampleTopBar = new Panel(0, 0, window.innerWidth, 100);
@@ -71,16 +71,6 @@ function View(model) {
 View.prototype = Object.create(ViewPanel.prototype);
 
 View.prototype.preprocess = function(ctx, offsetX, offsetY) {
-
-  this.canvas.width = window.innerWidth;
-  this.canvas.height = window.innerHeight;
-  /**
-   * This menu just takes up the whole screen.
-   */
-  this.x = 0;
-  this.y = 0;
-  this.width = window.innerWidth;
-  this.height = window.innerHeight;
 
   /**
    * Defaults to 1920 by 1080 with at least x% margins.

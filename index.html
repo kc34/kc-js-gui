@@ -33,12 +33,12 @@ html, body {
 /**
  * A model. Doesn't do anything yet.
  */
-var model;
+var myModel;
 
 /**
  * A GUI. It's a very special Panel.
  */
-var view;
+var myView;
 
 /**
  * 	Other important global variables (e.g. time-keeping, environment)
@@ -48,11 +48,6 @@ var TIME_STEP = 1.0 / 60; // Time-step. Measured in seconds.
 var accumulator = 0.0;
 var currentTime = new Date();
 var currentDraw = new Date();
-
-function init() {
-  model = new Model(view);
-  view = new View(model);
-}
 
 /**
  * 	Runs physics-model and rendering separately, but on same thread.
@@ -68,23 +63,14 @@ function main() {
 
   accumulator += frameTime;
   while ( accumulator >= TIME_STEP ) {
-    model.update(TIME_STEP);
+    myModel.update(TIME_STEP);
     accumulator -= TIME_STEP;
   }
-  view.draw();
+  myView.draw();
 }
 
-/**
- * Canvas event registration
- */
-
-/** Event: Mousedown followed by mouseup. */
-window.addEventListener('click', function(event) {
-	view["clickHandler"](event);
-}, false);
-
-//myModel.start();
-init();
+myModel = new Model(myView);
+myView = new View(myModel);
 var mainLooper = setInterval(main, 1000 * TIME_STEP);
 
 </script>

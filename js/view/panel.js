@@ -1,8 +1,11 @@
 "use strict";
 /**
- * Panel 0.1.1
+ * Panel 0.1.2
  *
  * By Kevin Chang
+ *
+ * + Added link to parentComponent
+ * + Added addEventListener calls in ViewPanel.
  */
 
 /**
@@ -17,6 +20,7 @@ function Panel(x, y, width, height) {
   this.width = width;
   this.height = height;
   this.color = "#000000"
+  this.parentComponent = null;
   this.components = {};
   this.z_index = 0; // Inspired by CSS. Higher number means it will be up front.
 }
@@ -64,12 +68,12 @@ Panel.prototype.postprocess = function(ctx, windowX, windowY) {};
  *  (3, 3) -> false
  */
 Panel.containsPoint = function(panel, point) {
-  return ((panel.x <= point.x && point.x <= panel.x + panel.width)
-      && (panel.y <= point.y && point.y <= panel.y + panel.height));
+  return ((panel.x <= point.clientX && point.clientX <= panel.x + panel.width)
+      && (panel.y <= point.clientY && point.clientY <= panel.y + panel.height));
 }
 
 /**
- * Given a click, delegates to all of its components.
+ * Given a click, delegates to its top component.
  */
 Panel.prototype.clickHandler = function(event) {
 
@@ -78,11 +82,9 @@ Panel.prototype.clickHandler = function(event) {
     .filter(function(panel) { return Panel.containsPoint(panel, event)}) // Removes unclicked ones
     .sort(function(panel1, panel2) { return -1 * (panel1.z_index - panel2.z_index) }); // Sorts descending
 
-  console.log(sortedPanels)
-
   if (sortedPanels.length > 0) {
     var panel = sortedPanels[0];
-    panel.clickHandler({x : event.x - panel.x, y : event.y - panel.y})
+    panel.clickHandler({clientX : event.clientX - panel.x, clientY : event.clientY - panel.y})
   }
 }
 
@@ -91,6 +93,7 @@ Panel.prototype.clickHandler = function(event) {
  */
 Panel.prototype.addComponent = function(name, component) {
   this.components[name] = component;
+  this.components[name].parent = this;
 }
 
 /**
@@ -117,6 +120,12 @@ function ViewPanel(canvas) {
   this.canvas.height = window.innerHeight;
   this.canvas.onmousedown = function(){ return false; };
   this.ctx = this.canvas.getContext("2d");
+
+  var instance = this;
+
+  this.canvas.addEventListener('click', function(event) {
+  	instance.clickHandler(event);
+  }, false);
 }
 
 ViewPanel.prototype = Object.create(Panel.prototype);
@@ -125,19 +134,8 @@ ViewPanel.prototype = Object.create(Panel.prototype);
  * Specialized draw used to start GUI hierarcies.
  */
 ViewPanel.prototype.draw = function() {
-  Panel.prototype.draw.call(this, this.ctx, 0, 0);
-}
-
-/**
- * Default window setter. Sets this panel to take up all available space.
- */
-ViewPanel.prototype.preprocess = function() {
   this.setWindow(0, 0, window.innerWidth, window.innerHeight);
-}
-/**
- * Given a click, delegates to all of its components.
- */
-ViewPanel.prototype.clickHandler = function(event) {
-  var canvasRect = this.canvas.getBoundingClientRect();
-  Panel.prototype.clickHandler.call(this, {x: event.x - canvasRect.left, y: event.y - canvasRect.top});
+  this.canvas.width = window.innerWidth;
+  this.canvas.height = window.innerHeight;
+  Panel.prototype.draw.call(this, this.ctx, 0, 0);
 }
