@@ -1,11 +1,15 @@
 "use strict";
 /**
- * Panel 0.1.2
+ * Panel 0.1.3.1
  *
  * By Kevin Chang
- *
- * + Added link to parentComponent
+ * + touchstart now calls mouseDown and click. Dangerous?
+ * + runOnTopComponent: functional
  * + Added addEventListener calls in ViewPanel.
+ *
+ * TODO:
+ * + Dispatch touch events
+ * + Focus to know where to send key events
  */
 
 /**
@@ -72,20 +76,54 @@ Panel.containsPoint = function(panel, point) {
       && (panel.y <= point.clientY && point.clientY <= panel.y + panel.height));
 }
 
+Panel.prototype.runOnTopComponent = function(mouseEvent, eventHandler) {
+
+  return Object.keys(this.components) // Gets keys
+    .map(function(key) { return this.components[key] }, this) // Gets panel references
+    .filter(function(panel) { return Panel.containsPoint(panel, mouseEvent)}) // Removes unclicked ones
+    .sort(function(panel1, panel2) { return -1 * (panel1.z_index - panel2.z_index) }) // Sorts descending
+    .slice(0, 1)
+    .forEach(eventHandler);
+}
+
 /**
  * Given a click, delegates to its top component.
  */
 Panel.prototype.clickHandler = function(event) {
+  this.runOnTopComponent(event, function(component) {
+    component.clickHandler({clientX : event.clientX - component.x, clientY : event.clientY - component.y});
+  });
+}
 
-  var sortedPanels = Object.keys(this.components) // Gets keys
+Panel.prototype.mousedownHandler = function(event) {
+  this.runOnTopComponent(event, function(component) {
+    component.mousedownHandler({clientX : event.clientX - component.x, clientY : event.clientY - component.y});
+  });
+}
+
+Panel.prototype.mouseupHandler = function(event) {
+  this.runOnTopComponent(event, function(component) {
+    component.mouseupHandler({clientX : event.clientX - component.x, clientY : event.clientY - component.y});
+  });
+}
+
+Panel.prototype.mousemoveHandler = function(event) {
+  this.runOnTopComponent(event, function(component) {
+    component.mousemoveHandler({clientX : event.clientX - component.x, clientY : event.clientY - component.y});
+  });
+}
+
+Panel.prototype.mousewheelHandler = function(event) {
+  this.runOnTopComponent(event, function(component) {
+    component.mousewheelHandler({clientX : event.clientX - component.x, clientY : event.clientY - component.y, wheelDelta : event.wheelDelta });
+  });
+}
+
+// TODO: Add focus
+Panel.prototype.keydownHandler = function(key) {
+  Object.keys(this.components) // Gets keys
     .map(function(key) { return this.components[key] }, this) // Gets panel references
-    .filter(function(panel) { return Panel.containsPoint(panel, event)}) // Removes unclicked ones
-    .sort(function(panel1, panel2) { return -1 * (panel1.z_index - panel2.z_index) }); // Sorts descending
-
-  if (sortedPanels.length > 0) {
-    var panel = sortedPanels[0];
-    panel.clickHandler({clientX : event.clientX - panel.x, clientY : event.clientY - panel.y})
-  }
+    .forEach(function(panel) { panel.keydownHandler(key)} ) // Calls all the panel handlers
 }
 
 /**
@@ -123,9 +161,63 @@ function ViewPanel(canvas) {
 
   var instance = this;
 
+  this.canvas.onmousedown = function(){ return false; };
+
   this.canvas.addEventListener('click', function(event) {
   	instance.clickHandler(event);
   }, false);
+
+  this.canvas.addEventListener('mousedown', function(event) {
+  	instance.mousedownHandler(event);
+  }, false);
+
+  this.canvas.addEventListener('mouseup', function(event) {
+  	instance.mouseupHandler(event);
+  }, false);
+
+  this.canvas.addEventListener('mousemove', function(event) {
+  	instance.mousemoveHandler(event);
+  }, false);
+
+  this.canvas.addEventListener('mousewheel', function(event) {
+  	instance.mousewheelHandler(event);
+  }, false);
+
+  this.canvas.addEventListener("DOMMouseScroll", function(event) {
+  	instance.mousewheelHandler({clientX : event.clientX, clientY : event.clientY, wheelDelta : event.detail * -1});
+  }, false);
+
+  window.addEventListener('keydown', function(key) {
+  	instance.keydownHandler(key);
+  }, false);
+
+  this.canvas.addEventListener('touchstart', function(event) {
+  	event.preventDefault(); // not a click!
+  	var touches = event.changedTouches;
+
+  	if (touches.length > 0)	{
+      instance.clickHandler({clientX: touches[0].clientX, clientY: touches[0].clientY});
+  		instance.mousedownHandler({clientX: touches[0].clientX, clientY: touches[0].clientY});
+  	}
+  });
+
+  this.canvas.addEventListener('touchmove', function(event) {
+  	event.preventDefault(); // not a click!
+  	var touches = event.changedTouches;
+
+  	if (touches.length > 0)	{
+  		instance.mousemoveHandler({clientX: touches[0].clientX, clientY: touches[0].clientY});
+  	}
+  });
+
+  this.canvas.addEventListener('touchend', function(event) {
+  	event.preventDefault(); // not a click!
+  	var touches = event.changedTouches;
+
+  	if (touches.length > 0)	{
+  		instance.mouseupHandler({clientX: touches[0].clientX, clientY: touches[0].clientY});
+  	}
+  });
 }
 
 ViewPanel.prototype = Object.create(Panel.prototype);
