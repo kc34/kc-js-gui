@@ -1,15 +1,13 @@
 "use strict";
 /**
- * Panel 0.1.3.1
+ * Panel 0.1.3.2
  *
  * By Kevin Chang
- * + touchstart now calls mouseDown and click. Dangerous?
- * + runOnTopComponent: functional
- * + Added addEventListener calls in ViewPanel.
+ * + touchevents have own delegators
  *
  * TODO:
- * + Dispatch touch events
  * + Focus to know where to send key events
+ * + Consider consolidating mouse and touch into pointer events
  */
 
 /**
@@ -126,6 +124,25 @@ Panel.prototype.keydownHandler = function(key) {
     .forEach(function(panel) { panel.keydownHandler(key)} ) // Calls all the panel handlers
 }
 
+Panel.prototype.touchstartHandler = function(event) {
+  this.runOnTopComponent(event, function(component) {
+    component.touchstartHandler({clientX : event.clientX - component.x, clientY : event.clientY - component.y, identifier : event.identifier});
+  });
+}
+
+Panel.prototype.touchmoveHandler = function(event) {
+  console.log(event);
+  this.runOnTopComponent(event, function(component) {
+    component.touchmoveHandler({clientX : event.clientX - component.x, clientY : event.clientY - component.y, identifier : event.identifier});
+  });
+}
+
+Panel.prototype.touchendHandler = function(event) {
+  this.runOnTopComponent(event, function(component) {
+    component.touchendHandler({clientX : event.clientX - component.x, clientY : event.clientY - component.y, identifier : event.identifier});
+  });
+}
+
 /**
  * Add components
  */
@@ -193,30 +210,24 @@ function ViewPanel(canvas) {
 
   this.canvas.addEventListener('touchstart', function(event) {
   	event.preventDefault(); // not a click!
-  	var touches = event.changedTouches;
-
-  	if (touches.length > 0)	{
-      instance.clickHandler({clientX: touches[0].clientX, clientY: touches[0].clientY});
-  		instance.mousedownHandler({clientX: touches[0].clientX, clientY: touches[0].clientY});
-  	}
+    for (var touchID in event.changedTouches) {
+      instance.touchstartHandler(event.changedTouches[touchID]);
+    }
   });
 
   this.canvas.addEventListener('touchmove', function(event) {
   	event.preventDefault(); // not a click!
-  	var touches = event.changedTouches;
-
-  	if (touches.length > 0)	{
-  		instance.mousemoveHandler({clientX: touches[0].clientX, clientY: touches[0].clientY});
-  	}
+    for (var touchID in event.changedTouches) {
+      instance.touchmoveHandler(event.changedTouches[touchID]);
+    }
   });
 
   this.canvas.addEventListener('touchend', function(event) {
   	event.preventDefault(); // not a click!
   	var touches = event.changedTouches;
-
-  	if (touches.length > 0)	{
-  		instance.mouseupHandler({clientX: touches[0].clientX, clientY: touches[0].clientY});
-  	}
+    for (var touchID in event.changedTouches) {
+      instance.touchendHandler(event.changedTouches[touchID]);
+    }
   });
 }
 
