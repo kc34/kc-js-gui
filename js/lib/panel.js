@@ -166,7 +166,7 @@
 
     Panel.prototype.addComponent = function(name, component) {
       this.components[name] = component;
-      return this.components[name].parent = this;
+      return this.components[name].parentComponent = this;
     };
 
     Panel.prototype.setWindow = function(x, y, width, height) {
@@ -180,13 +180,13 @@
 
   })();
 
-  this.ViewPanel = (function(superClass) {
-    extend(ViewPanel, superClass);
+  this.CanvasPanel = (function(superClass) {
+    extend(CanvasPanel, superClass);
 
-    function ViewPanel(canvas) {
+    function CanvasPanel(canvas) {
       var instance;
       this.canvas = canvas;
-      ViewPanel.__super__.constructor.call(this, 0, 0, this.canvas.width, this.canvas.height);
+      CanvasPanel.__super__.constructor.call(this, 0, 0, this.canvas.width, this.canvas.height);
       this.canvas = canvas;
       this.canvas.width = window.innerWidth;
       this.canvas.height = window.innerHeight;
@@ -252,14 +252,14 @@
       });
     }
 
-    ViewPanel.prototype.draw = function() {
+    CanvasPanel.prototype.draw = function() {
       this.setWindow(0, 0, window.innerWidth, window.innerHeight);
       this.canvas.width = window.innerWidth;
       this.canvas.height = window.innerHeight;
       return Panel.prototype.draw.call(this, this.ctx, 0, 0);
     };
 
-    return ViewPanel;
+    return CanvasPanel;
 
   })(this.Panel);
 

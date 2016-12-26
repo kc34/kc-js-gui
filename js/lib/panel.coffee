@@ -107,7 +107,7 @@ class @Panel
   # Add components
   addComponent: (name, component) ->
     @components[name] = component
-    @components[name].parent = this
+    @components[name].parentComponent = this
   # Setter function for the window size and position
   setWindow: (x, y, width, height) ->
     @x = x
@@ -115,7 +115,7 @@ class @Panel
     @width = width
     @height = height
 
-class @ViewPanel extends @Panel
+class @CanvasPanel extends @Panel
   # The MainPanel is a special Panel that has access to the canvas
   # GUI hierarchies should start with a MainPanel.
   constructor: (canvas) ->
