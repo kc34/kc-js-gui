@@ -17,6 +17,7 @@
         extend(_Class, superClass1);
 
         function _Class(x, y, width, height) {
+          var instance;
           _Class.__super__.constructor.call(this, x, y, width, height);
           this.color = "#FF0000";
           this.exampleTopBar = new Panel(0, 0, window.innerWidth, 100);
@@ -36,11 +37,6 @@
                 }
 
                 _Class.prototype.clickHandler = function() {
-                  console.log("I'm hit!");
-                  model.balls.push({
-                    "x": 5,
-                    "y": 5
-                  });
                   return this.parentComponent.buttonClickEvent();
                 };
 
@@ -113,16 +109,22 @@
 
           })(Panel))(100, 50, 100, 100);
           this.addComponent("examplePopup", this.examplePopup);
+          instance = this;
+          this.exampleSideMenu.exampleButton.clickHandler = function() {
+            console.log(instance);
+            console.log("I'm hit!");
+            model.balls.push({
+              "x": 5,
+              "y": 5
+            });
+            return instance.exampleCanvas.text = "You clicked the button!";
+          };
         }
 
         _Class.prototype.preprocess = function(renderer, offsetX, offsetY) {
           this.exampleTopBar.setWindow(0, 0, this.width, this.height * 0.1);
           this.exampleSideMenu.setWindow(0, this.height * 0.1, this.width * 0.1, this.height * 0.9);
           return this.exampleCanvas.setWindow(this.width * 0.1, this.height * 0.1, this.width * 0.9, this.height * 0.9);
-        };
-
-        _Class.prototype.buttonClickEvent = function() {
-          return this.exampleCanvas.text = "You clicked the button!";
         };
 
         return _Class;

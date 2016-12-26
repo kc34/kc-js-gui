@@ -26,8 +26,6 @@ class @View extends @CanvasPanel
             @color = "#808080"
             @exampleButton = new (class extends Panel
               clickHandler: () ->
-                console.log("I'm hit!");
-                model.balls.push({"x" : 5, "y" : 5});
                 this.parentComponent.buttonClickEvent()
             )(10, 10, 80, 80)
             this.addComponent("exampleButton", @exampleButton)
@@ -64,14 +62,19 @@ class @View extends @CanvasPanel
             ctx.fillText("Click me to drop my z-index.", offsetX, 30 + offsetY)
         )(100, 50, 100, 100)
         this.addComponent("examplePopup", @examplePopup)
+        instance = this
+        this.exampleSideMenu.exampleButton.clickHandler = () ->
+          console.log(instance)
+          console.log("I'm hit!");
+          model.balls.push({"x" : 5, "y" : 5});
+          instance.exampleCanvas.text = "You clicked the button!";
       preprocess: (renderer, offsetX, offsetY) ->
         @exampleTopBar.setWindow(0, 0, this.width, this.height * 0.1)
         @exampleSideMenu.setWindow(0, this.height * 0.1, this.width * 0.1, this.height * 0.9)
         @exampleCanvas.setWindow(this.width * 0.1, this.height * 0.1, this.width * 0.9, this.height * 0.9)
-      buttonClickEvent: () ->
-        @exampleCanvas.text = "You clicked the button!";
     )(0, 0, window.innerWidth, window.innerHeight)
     this.addComponent("exampleMainScreen", @exampleMainScreen)
+
   preprocess: (ctx, offsetX, offsetY) ->
     ###
       Defaults to 1920 by 1080 with at least x% margins.
