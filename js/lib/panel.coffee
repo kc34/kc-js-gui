@@ -18,15 +18,14 @@ class @Panel
     @height = height
     @color = "#000000"
     @parentComponent = null
-    @components = {}
-    @z_index = 0 # Inspired by CSS. Higher number means it will be up front.
+    @components = []
+    @zIndex = 0 # Inspired by CSS. Higher number means it will be up front.
   # The main drawing function. Contains space for pre- and post-processing.
   draw: (ctx, windowX, windowY) ->
     @preprocess(ctx, windowX, windowY)
     @drawPanel(ctx, windowX, windowY)
     @postprocess(ctx, windowX, windowY)
-    sorted = (val for key, val of @components)
-      .sort((obj1, obj2) -> obj1.z_index - obj2.z_index) # sorts-by-ascending
+    sorted = @components.sort((obj1, obj2) -> obj1.zIndex - obj2.zIndex) # sorts-by-ascending
     obj.draw(ctx, windowX + obj.x, windowY + obj.y) for obj in sorted
   # Draws itself onto the given context.
   drawPanel: (ctx, windowX, windowY) ->
@@ -41,73 +40,51 @@ class @Panel
   # Example: Panel(0, 0, 2, 2):
   # (1, 1) -> true
   # (3, 3) -> false
-  @containsPoint: (panel, point) -> ((panel.x <= point.clientX && point.clientX <= panel.x + panel.width) && (panel.y <= point.clientY && point.clientY <= panel.y + panel.height))
+  containsPoint: (point) -> ((@x <= point.clientX && point.clientX <= @x + @width) && (@y <= point.clientY && point.clientY <= @y + @height))
   runOnTopComponent: (mouseEvent, eventHandler) ->
-    return Object.keys(this.components) # Gets keys
-      .map(((key) -> this.components[key]), this) # Gets panel references
-      .filter((panel) -> Panel.containsPoint(panel, mouseEvent)) # Removes unclicked ones
-      .sort((panel1, panel2) -> -1 * (panel1.z_index - panel2.z_index)) # Sorts descending
+    return @components
+      .filter((panel) -> panel.containsPoint(mouseEvent)) # Removes unclicked ones
+      .sort((panel1, panel2) -> -1 * (panel1.zIndex - panel2.zIndex)) # Sorts descending
       .slice(0, 1)
       .forEach(eventHandler);
   # Given a click, delegates to its top component
   clickHandler: (event) ->
     @runOnTopComponent(event, (component) ->
-      component.clickHandler({
-        clientX: event.clientX - component.x
-        clientY: event.clientY - component.y
-        }))
+      component.clickHandler(component.translateEvent(event)))
   mousedownHandler: (event) ->
     @runOnTopComponent(event, (component) ->
-      component.mousedownHandler({
-        clientX: event.clientX - component.x
-        clientY: event.clientY - component.y
-        }))
+      component.mousedownHandler(component.translateEvent(event)))
   mouseupHandler: (event) ->
     @runOnTopComponent(event, (component) ->
-      component.mouseupHandler({
-        clientX: event.clientX - component.x
-        clientY: event.clientY - component.y
-        }))
+      component.mouseupHandler(component.translateEvent(event)))
   mousemoveHandler: (event) ->
     @runOnTopComponent(event, (component) ->
-      component.mousemoveHandler({
-        clientX: event.clientX - component.x
-        clientY: event.clientY - component.y
-        }))
+      component.mousemoveHandler(component.translateEvent(event)))
   mousewheelHandler: (event) ->
     @runOnTopComponent(event, (component) ->
-      component.mousewheelHandler({
-        clientX: event.clientX - component.x
-        clientY: event.clientY - component.y
-        wheelDelta: event.wheelDelta
-        }))
+      component.mousewheelHandler(component.translateEvent(event)))
   touchstartHandler: (event) ->
     @runOnTopComponent(event, (component) ->
-      component.touchstartHandler({
-        clientX : event.clientX - component.x
-        clientY : event.clientY - component.y
-        identifier : event.identifier
-        }))
+      component.touchstartHandler(component.translateEvent(event)))
   touchmoveHandler: (event) ->
     @runOnTopComponent(event, (component) ->
-      component.touchmoveHandler({
-        clientX : event.clientX - component.x
-        clientY : event.clientY - component.y
-        identifier : event.identifier
-        }))
+      component.touchmoveHandler(component.translateEvent(event)))
   touchendHandler: (event) ->
     @runOnTopComponent(event, (component) ->
-      component.touchendHandler({
-        clientX : event.clientX - component.x
-        clientY : event.clientY - component.y
-        identifier : event.identifier
-        }))
+      component.touchendHandler(component.translateEvent(event)))
+  translateEvent: (event) ->
+    newEvent = {}
+    for key, val in event
+      newEvent[key] = val
+    newEvent.clientX = event.clientX - @x
+    newEvent.clientY = event.clientY - @y
+    return newEvent
   keydownHandler: (key) ->
-    (panel.keydownHandler(key) for panel in (this.components[key] for key in Object.keys(this.components)))
+    (panel.keydownHandler(key) for panel in this.components)
   # Add components
-  addComponent: (name, component) ->
-    @components[name] = component
-    @components[name].parentComponent = this
+  addComponent: (component) ->
+    @components.push(component)
+    @components.parentComponent = this
   # Setter function for the window size and position
   setWindow: (x, y, width, height) ->
     @x = x
@@ -120,20 +97,23 @@ class @CanvasPanel extends @Panel
   # GUI hierarchies should start with a MainPanel.
   constructor: (canvas) ->
     @canvas = canvas
-    super(0, 0, @canvas.width, @canvas.height)
-    @canvas = canvas;
     @canvas.width = window.innerWidth;
     @canvas.height = window.innerHeight;
+    super(0, 0, @canvas.width, @canvas.height)
     @canvas.onmousedown = -> false
     @ctx = @canvas.getContext("2d");
+    copyEvent = () ->
+      newEvent = {}
+      for key, val of event
+        newEvent[key] = val
+      return newEvent
     instance = this
     @canvas.addEventListener('click', ((event) -> instance.clickHandler(event)), false)
     @canvas.addEventListener('mousedown', ((event) -> instance.mousedownHandler(event)), false)
     @canvas.addEventListener('mouseup', ((event) -> instance.mouseupHandler(event)), false)
     @canvas.addEventListener('mousemove', ((event) -> instance.mousemoveHandler(event)), false)
     @canvas.addEventListener('mousewheel', ((event) -> instance.mousewheelHandler(event)), false)
-    @canvas.addEventListener(
-      "DOMMouseScroll",
+    @canvas.addEventListener("DOMMouseScroll",
       ((event) -> instance.mousewheelHandler({
         clientX : event.clientX,
         clientY : event.clientY,
@@ -142,15 +122,15 @@ class @CanvasPanel extends @Panel
       false);
     @canvas.addEventListener('touchstart', (event) ->
       event.preventDefault() # not a click!
-      instance.touchstartHandler(touchEvent) for touchEvent in event.changedTouches
+      instance.mousedownHandler(touchEvent) for touchEvent in event.changedTouches
     )
     @canvas.addEventListener('touchmove', (event) ->
       event.preventDefault()
-      instance.touchmoveHandler(touchEvent) for touchEvent in event.changedTouches
+      instance.mousemoveHandler(touchEvent) for touchEvent in event.changedTouches
     )
     @canvas.addEventListener('touchend', (event) ->
       event.preventDefault()
-      instance.touchendHandler(touchEvent) for touchEvent in event.changedTouches
+      instance.clickHandler(touchEvent) for touchEvent in event.changedTouches
     )
   # Specialized draw used to start GUI hierarchies
   draw: () ->

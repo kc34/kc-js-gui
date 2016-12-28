@@ -16,26 +16,17 @@
       this.height = height;
       this.color = "#000000";
       this.parentComponent = null;
-      this.components = {};
-      this.z_index = 0;
+      this.components = [];
+      this.zIndex = 0;
     }
 
     Panel.prototype.draw = function(ctx, windowX, windowY) {
-      var i, key, len, obj, results, sorted, val;
+      var i, len, obj, results, sorted;
       this.preprocess(ctx, windowX, windowY);
       this.drawPanel(ctx, windowX, windowY);
       this.postprocess(ctx, windowX, windowY);
-      sorted = ((function() {
-        var ref, results;
-        ref = this.components;
-        results = [];
-        for (key in ref) {
-          val = ref[key];
-          results.push(val);
-        }
-        return results;
-      }).call(this)).sort(function(obj1, obj2) {
-        return obj1.z_index - obj2.z_index;
+      sorted = this.components.sort(function(obj1, obj2) {
+        return obj1.zIndex - obj2.zIndex;
       });
       results = [];
       for (i = 0, len = sorted.length; i < len; i++) {
@@ -54,108 +45,81 @@
 
     Panel.prototype.postprocess = function(ctx, windowX, windowY) {};
 
-    Panel.containsPoint = function(panel, point) {
-      return (panel.x <= point.clientX && point.clientX <= panel.x + panel.width) && (panel.y <= point.clientY && point.clientY <= panel.y + panel.height);
+    Panel.prototype.containsPoint = function(point) {
+      return (this.x <= point.clientX && point.clientX <= this.x + this.width) && (this.y <= point.clientY && point.clientY <= this.y + this.height);
     };
 
     Panel.prototype.runOnTopComponent = function(mouseEvent, eventHandler) {
-      return Object.keys(this.components).map((function(key) {
-        return this.components[key];
-      }), this).filter(function(panel) {
-        return Panel.containsPoint(panel, mouseEvent);
+      return this.components.filter(function(panel) {
+        return panel.containsPoint(mouseEvent);
       }).sort(function(panel1, panel2) {
-        return -1 * (panel1.z_index - panel2.z_index);
+        return -1 * (panel1.zIndex - panel2.zIndex);
       }).slice(0, 1).forEach(eventHandler);
     };
 
     Panel.prototype.clickHandler = function(event) {
       return this.runOnTopComponent(event, function(component) {
-        return component.clickHandler({
-          clientX: event.clientX - component.x,
-          clientY: event.clientY - component.y
-        });
+        return component.clickHandler(component.translateEvent(event));
       });
     };
 
     Panel.prototype.mousedownHandler = function(event) {
       return this.runOnTopComponent(event, function(component) {
-        return component.mousedownHandler({
-          clientX: event.clientX - component.x,
-          clientY: event.clientY - component.y
-        });
+        return component.mousedownHandler(component.translateEvent(event));
       });
     };
 
     Panel.prototype.mouseupHandler = function(event) {
       return this.runOnTopComponent(event, function(component) {
-        return component.mouseupHandler({
-          clientX: event.clientX - component.x,
-          clientY: event.clientY - component.y
-        });
+        return component.mouseupHandler(component.translateEvent(event));
       });
     };
 
     Panel.prototype.mousemoveHandler = function(event) {
       return this.runOnTopComponent(event, function(component) {
-        return component.mousemoveHandler({
-          clientX: event.clientX - component.x,
-          clientY: event.clientY - component.y
-        });
+        return component.mousemoveHandler(component.translateEvent(event));
       });
     };
 
     Panel.prototype.mousewheelHandler = function(event) {
       return this.runOnTopComponent(event, function(component) {
-        return component.mousewheelHandler({
-          clientX: event.clientX - component.x,
-          clientY: event.clientY - component.y,
-          wheelDelta: event.wheelDelta
-        });
+        return component.mousewheelHandler(component.translateEvent(event));
       });
     };
 
     Panel.prototype.touchstartHandler = function(event) {
       return this.runOnTopComponent(event, function(component) {
-        return component.touchstartHandler({
-          clientX: event.clientX - component.x,
-          clientY: event.clientY - component.y,
-          identifier: event.identifier
-        });
+        return component.touchstartHandler(component.translateEvent(event));
       });
     };
 
     Panel.prototype.touchmoveHandler = function(event) {
       return this.runOnTopComponent(event, function(component) {
-        return component.touchmoveHandler({
-          clientX: event.clientX - component.x,
-          clientY: event.clientY - component.y,
-          identifier: event.identifier
-        });
+        return component.touchmoveHandler(component.translateEvent(event));
       });
     };
 
     Panel.prototype.touchendHandler = function(event) {
       return this.runOnTopComponent(event, function(component) {
-        return component.touchendHandler({
-          clientX: event.clientX - component.x,
-          clientY: event.clientY - component.y,
-          identifier: event.identifier
-        });
+        return component.touchendHandler(component.translateEvent(event));
       });
+    };
+
+    Panel.prototype.translateEvent = function(event) {
+      var i, key, len, newEvent, val;
+      newEvent = {};
+      for (val = i = 0, len = event.length; i < len; val = ++i) {
+        key = event[val];
+        newEvent[key] = val;
+      }
+      newEvent.clientX = event.clientX - this.x;
+      newEvent.clientY = event.clientY - this.y;
+      return newEvent;
     };
 
     Panel.prototype.keydownHandler = function(key) {
       var i, len, panel, ref, results;
-      ref = (function() {
-        var j, len, ref, results1;
-        ref = Object.keys(this.components);
-        results1 = [];
-        for (j = 0, len = ref.length; j < len; j++) {
-          key = ref[j];
-          results1.push(this.components[key]);
-        }
-        return results1;
-      }).call(this);
+      ref = this.components;
       results = [];
       for (i = 0, len = ref.length; i < len; i++) {
         panel = ref[i];
@@ -164,9 +128,9 @@
       return results;
     };
 
-    Panel.prototype.addComponent = function(name, component) {
-      this.components[name] = component;
-      return this.components[name].parentComponent = this;
+    Panel.prototype.addComponent = function(component) {
+      this.components.push(component);
+      return this.components.parentComponent = this;
     };
 
     Panel.prototype.setWindow = function(x, y, width, height) {
@@ -184,16 +148,24 @@
     extend(CanvasPanel, superClass);
 
     function CanvasPanel(canvas) {
-      var instance;
-      this.canvas = canvas;
-      CanvasPanel.__super__.constructor.call(this, 0, 0, this.canvas.width, this.canvas.height);
+      var copyEvent, instance;
       this.canvas = canvas;
       this.canvas.width = window.innerWidth;
       this.canvas.height = window.innerHeight;
+      CanvasPanel.__super__.constructor.call(this, 0, 0, this.canvas.width, this.canvas.height);
       this.canvas.onmousedown = function() {
         return false;
       };
       this.ctx = this.canvas.getContext("2d");
+      copyEvent = function() {
+        var key, newEvent, val;
+        newEvent = {};
+        for (key in event) {
+          val = event[key];
+          newEvent[key] = val;
+        }
+        return newEvent;
+      };
       instance = this;
       this.canvas.addEventListener('click', (function(event) {
         return instance.clickHandler(event);
@@ -224,7 +196,7 @@
         results = [];
         for (i = 0, len = ref.length; i < len; i++) {
           touchEvent = ref[i];
-          results.push(instance.touchstartHandler(touchEvent));
+          results.push(instance.mousedownHandler(touchEvent));
         }
         return results;
       });
@@ -235,7 +207,7 @@
         results = [];
         for (i = 0, len = ref.length; i < len; i++) {
           touchEvent = ref[i];
-          results.push(instance.touchmoveHandler(touchEvent));
+          results.push(instance.mousemoveHandler(touchEvent));
         }
         return results;
       });
@@ -246,7 +218,7 @@
         results = [];
         for (i = 0, len = ref.length; i < len; i++) {
           touchEvent = ref[i];
-          results.push(instance.touchendHandler(touchEvent));
+          results.push(instance.clickHandler(touchEvent));
         }
         return results;
       });

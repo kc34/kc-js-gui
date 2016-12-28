@@ -22,7 +22,7 @@
           this.color = "#FF0000";
           this.exampleTopBar = new Panel(0, 0, window.innerWidth, 100);
           this.exampleTopBar.color = "#33AA66";
-          this.addComponent("exampleTopBar", this.exampleTopBar);
+          this.addComponent(this.exampleTopBar);
           this.exampleSideMenu = new ((function(superClass2) {
             extend(_Class, superClass2);
 
@@ -43,11 +43,11 @@
                 return _Class;
 
               })(Panel))(10, 10, 80, 80);
-              this.addComponent("exampleButton", this.exampleButton);
+              this.addComponent(this.exampleButton);
             }
 
             _Class.prototype.preprocess = function() {
-              return this.components["exampleButton"].setWindow(this.width * 0.1, this.width * 0.1, this.width * 0.8, this.width * 0.8);
+              return this.exampleButton.setWindow(this.width * 0.1, this.width * 0.1, this.width * 0.8, this.width * 0.8);
             };
 
             _Class.prototype.buttonClickEvent = function() {
@@ -57,7 +57,7 @@
             return _Class;
 
           })(Panel))(0, 100, 100, window.innerHeight);
-          this.addComponent("exampleSideMenu", this.exampleSideMenu);
+          this.addComponent(this.exampleSideMenu);
           this.exampleCanvas = new ((function(superClass2) {
             extend(_Class, superClass2);
 
@@ -83,19 +83,19 @@
             return _Class;
 
           })(Panel))(100, 100, window.innerWidth, window.innerHeight);
-          this.addComponent("exampleCanvas", this.exampleCanvas);
+          this.addComponent(this.exampleCanvas);
           this.examplePopup = new ((function(superClass2) {
             extend(_Class, superClass2);
 
             function _Class(x, y, width, height) {
               _Class.__super__.constructor.call(this, x, y, width, height);
               this.color = "#FF0000";
-              this.z_index = 500;
+              this.zIndex = 500;
             }
 
             _Class.prototype.clickHandler = function() {
               console.log("Ow");
-              return this.z_index = -500;
+              return this.zIndex = -500;
             };
 
             _Class.prototype.postprocess = function(ctx, offsetX, offsetY) {
@@ -108,7 +108,7 @@
             return _Class;
 
           })(Panel))(100, 50, 100, 100);
-          this.addComponent("examplePopup", this.examplePopup);
+          this.addComponent(this.examplePopup);
           instance = this;
           this.exampleSideMenu.exampleButton.clickHandler = function() {
             console.log(instance);
@@ -130,7 +130,7 @@
         return _Class;
 
       })(Panel))(0, 0, window.innerWidth, window.innerHeight);
-      this.addComponent("exampleMainScreen", this.exampleMainScreen);
+      this.addComponent(this.exampleMainScreen);
     }
 
     View.prototype.preprocess = function(ctx, offsetX, offsetY) {
