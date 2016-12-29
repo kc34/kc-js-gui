@@ -18,6 +18,7 @@
       this.parentComponent = null;
       this.components = [];
       this.zIndex = 0;
+      this.touchmouse = true;
     }
 
     Panel.prototype.draw = function(ctx, windowX, windowY) {
@@ -88,18 +89,31 @@
     };
 
     Panel.prototype.touchstartHandler = function(event) {
+      if (this.touchmouse) {
+        this.mousedownHandler(event);
+        return;
+      }
       return this.runOnTopComponent(event, function(component) {
         return component.touchstartHandler(component.translateEvent(event));
       });
     };
 
     Panel.prototype.touchmoveHandler = function(event) {
+      if (this.touchmouse) {
+        this.mousemoveHandler(event);
+        return;
+      }
       return this.runOnTopComponent(event, function(component) {
         return component.touchmoveHandler(component.translateEvent(event));
       });
     };
 
     Panel.prototype.touchendHandler = function(event) {
+      if (this.touchmouse) {
+        this.mouseupHandler(event);
+        this.clickHandler(event);
+        return;
+      }
       return this.runOnTopComponent(event, function(component) {
         return component.touchendHandler(component.translateEvent(event));
       });
@@ -196,7 +210,7 @@
         results = [];
         for (i = 0, len = ref.length; i < len; i++) {
           touchEvent = ref[i];
-          results.push(instance.mousedownHandler(touchEvent));
+          results.push(instance.touchstartHandler(touchEvent));
         }
         return results;
       });
@@ -207,7 +221,7 @@
         results = [];
         for (i = 0, len = ref.length; i < len; i++) {
           touchEvent = ref[i];
-          results.push(instance.mousemoveHandler(touchEvent));
+          results.push(instance.touchmoveHandler(touchEvent));
         }
         return results;
       });
@@ -218,7 +232,7 @@
         results = [];
         for (i = 0, len = ref.length; i < len; i++) {
           touchEvent = ref[i];
-          results.push(instance.clickHandler(touchEvent));
+          results.push(instance.touchendHandler(touchEvent));
         }
         return results;
       });

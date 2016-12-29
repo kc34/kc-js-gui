@@ -20,6 +20,7 @@ class @Panel
     @parentComponent = null
     @components = []
     @zIndex = 0 # Inspired by CSS. Higher number means it will be up front.
+    @touchmouse = true # use touch to simulate mouse
   # The main drawing function. Contains space for pre- and post-processing.
   draw: (ctx, windowX, windowY) ->
     @preprocess(ctx, windowX, windowY)
@@ -64,12 +65,22 @@ class @Panel
     @runOnTopComponent(event, (component) ->
       component.mousewheelHandler(component.translateEvent(event)))
   touchstartHandler: (event) ->
+    if @touchmouse
+      @mousedownHandler(event)
+      return
     @runOnTopComponent(event, (component) ->
       component.touchstartHandler(component.translateEvent(event)))
   touchmoveHandler: (event) ->
+    if @touchmouse
+      @mousemoveHandler(event)
+      return
     @runOnTopComponent(event, (component) ->
       component.touchmoveHandler(component.translateEvent(event)))
   touchendHandler: (event) ->
+    if @touchmouse
+      @mouseupHandler(event)
+      @clickHandler(event)
+      return
     @runOnTopComponent(event, (component) ->
       component.touchendHandler(component.translateEvent(event)))
   translateEvent: (event) ->
@@ -122,15 +133,15 @@ class @CanvasPanel extends @Panel
       false);
     @canvas.addEventListener('touchstart', (event) ->
       event.preventDefault() # not a click!
-      instance.mousedownHandler(touchEvent) for touchEvent in event.changedTouches
+      instance.touchstartHandler(touchEvent) for touchEvent in event.changedTouches
     )
     @canvas.addEventListener('touchmove', (event) ->
       event.preventDefault()
-      instance.mousemoveHandler(touchEvent) for touchEvent in event.changedTouches
+      instance.touchmoveHandler(touchEvent) for touchEvent in event.changedTouches
     )
     @canvas.addEventListener('touchend', (event) ->
       event.preventDefault()
-      instance.clickHandler(touchEvent) for touchEvent in event.changedTouches
+      instance.touchendHandler(touchEvent) for touchEvent in event.changedTouches
     )
   # Specialized draw used to start GUI hierarchies
   draw: () ->
